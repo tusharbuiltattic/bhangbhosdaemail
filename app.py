@@ -186,6 +186,7 @@ Akshat
 
     # --- Default Gmail-style HTML (keeps wording; natural gaps; left-aligned) ---
     # --- Super-clean Gmail-native look (minimal spacing, no extra padding) ---
+      # --- Exact Gmail-like formatting (no gaps, compact line rhythm) ---
     html_tpl = st.text_area(
         "HTML Body",
         value="""<!doctype html>
@@ -193,31 +194,30 @@ Akshat
   <head>
     <meta charset="UTF-8">
   </head>
-  <body style="margin:0;padding:0;font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#202124;line-height:1.4;">
-    <p>World's First Architecture OS; $262B TAM; 400+ LOIs</p>
+  <body style="margin:0;padding:0;font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#202124;line-height:1.4;text-align:left;">
+World's First Architecture OS; $262B TAM; 400+ LOIs<br><br>
 
-    <p>Hey {{ first_name|default('there') }},</p>
+Hey {{ first_name|default('there') }},<br><br>
 
-    <p>Today, homeowners wait weeks, architects lack speed, and SMB builders juggle operations across chats and spreadsheets.</p>
+Today, homeowners wait weeks, Architects lack speed, and SMB builders juggle ops across chats and spreadsheets.<br><br>
 
-    <p>Builtattic is an AI-first ecosystem that turns Idea → Plan → Fulfillment into minutes.</p>
+Builtattic: an AI-first ecosystem that turns Idea &lt; Plan &lt; Fulfillment into minutes.<br><br>
 
-    <p>VitruviAI (prosumer): prompt-to-plan with quick variants<br>
-    Studios (consumer): licensed templates, on-demand associates, curated materials<br>
-    Matters (SMB): progress, inventory, and payouts in one lightweight workflow</p>
+VitruviAI (prosumer): prompt-to-plan with quick variants<br>
+Studios (consumer): licensed templates, on-demand associates, curated materials<br>
+Matters (SMB): progress/inventory/payouts in one lightweight workflow<br><br>
 
-    <p>We’re raising $300k pre-seed to harden VitruviAI, expand supply, and run SMB pilots. 
-    If this overlaps with your investment vision, could we do a quick call?</p>
+Raising $300k pre-seed to harden VitruviAI, expand supply, and run SMB pilots. If this overlaps with your investment vision, could we do a quick call?<br><br>
 
-    <p>Demo: <a href="https://www.builtattic.com" style="color:#1a73e8;">www.builtattic.com</a> | PASSCODE: 0Xodtixh<br>
-    Site: <a href="https://www.builtattic.info" style="color:#1a73e8;">www.builtattic.info</a><br>
-    Attached: Pitch Deck</p>
+Demo: <a href="https://www.builtattic.com" style="color:#1a73e8;">www.builtattic.com</a> | USE PASSCODE: 0Xodtixh (Skip LOI)<br>
+Site: <a href="https://www.builtattic.info" style="color:#1a73e8;">www.builtattic.info</a><br>
+Attached: Pitch Deck<br><br>
 
-    <p>Regards,<br>
-    Akshat</p>
+Regards,<br>
+Akshat
   </body>
 </html>""",
-        height=340,
+        height=320,
     )
 
     st.subheader("3) Optional Headers")
@@ -418,4 +418,5 @@ Akshat
             st.error("Missing: " + ", ".join(missing))
         else:
             do_send()
+
 
