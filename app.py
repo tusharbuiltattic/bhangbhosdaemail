@@ -1,5 +1,4 @@
 import io
-import os
 import re
 import time
 import ssl
@@ -37,12 +36,9 @@ def extract_email(addr: str) -> str:
     m = re.search(r"<([^>]+)>", addr)
     return (m.group(1) if m else addr).strip()
 
-def looks_like_gmail(addr: str) -> bool:
-    a = (addr or "").lower()
-    return a.endswith("@gmail.com") or a.endswith("@googlemail.com")
-
 
 class SMTPSession:
+    # keyword-only for timeout/from_addr (prevents mis-ordered args)
     def __init__(self, host, port, user, password, use_ssl, use_tls, *, timeout: float = 30.0, from_addr: str = ""):
         self.host = host
         self.port = int(port)
@@ -74,8 +70,15 @@ class SMTPSession:
         except Exception:
             pass
 
-    def send(self, to_addr: str, subject: str, html_body: Optional[str], text_body: Optional[str],
-             headers: Dict[str, str] = {}, attachments: Optional[List[dict]] = None):
+    def send(
+        self,
+        to_addr: str,
+        subject: str,
+        html_body: Optional[str],
+        text_body: Optional[str],
+        headers: Dict[str, str] = {},
+        attachments: Optional[List[dict]] = None,
+    ):
         msg = MIMEMultipart("mixed")
         msg["From"] = self.from_addr
         msg["To"] = to_addr
@@ -116,7 +119,7 @@ with st.sidebar:
     st.header("Gmail SMTP Settings")
     st.caption("Use: smtp.gmail.com • Port 587 • STARTTLS ON • SSL OFF")
     smtp_host = st.text_input("SMTP Host", "smtp.gmail.com")
-    smtp_port_input = st.text_input("SMTP Port", "587")
+    smtp_port_input = st.text_input("SMTP Port", "587")  # cast later
     smtp_user = st.text_input("Gmail Address (username)", "")
     smtp_pass = st.text_input("App Password (16 chars)", "", type="password")
     from_addr = st.text_input("From (e.g. Your Name <you@gmail.com>)", "")
@@ -137,30 +140,39 @@ if file_csv:
     df = pd.read_csv(file_csv)
     st.dataframe(df.head(10), use_container_width=True)
 
-    if "email" not in df.columns or "first_name" not in df.columns:
-        st.error("Your CSV must include both 'email' and 'first_name' columns.")
+    # Validate required columns
+    if "email" not in df.columns:
+        st.error("Your CSV must include an 'email' column.")
+        st.stop()
+    if "first_name" not in df.columns:
+        st.error("Your CSV must include a 'first_name' column.")
         st.stop()
 
-    email_col = "email"
+    email_col = "email"  # fixed
 
     st.subheader("2) Templates (Jinja2)")
 
-    subject_tpl = st.text_area("Subject", "World's First Architecture OS; $262B TAM; 400+ LOIs", height=60)
+    subject_tpl = st.text_area(
+        "Subject",
+        "World's First Architecture OS; $262B TAM; 400+ LOIs",
+        height=60,
+    )
 
+    # Plain text body – keep EXACT wording
     text_tpl = st.text_area(
         "Plain Text Body",
         """World's First Architecture OS; $262B TAM; 400+ LOIs
 
 Hey {{ first_name|default('there') }},
-Today, homeowners wait weeks, Architects lack speed, and SMB builders juggle ops across chats and spreadsheets.
+Today, homeowners wait weeks, architects lack speed, and SMB builders juggle operations across chats and spreadsheets.
 
-Builtattic: an AI-first ecosystem that turns Idea < Plan < Fulfillment into minutes.
+Builtattic is an AI-first ecosystem that turns Idea → Plan → Fulfillment into minutes.
 
 VitruviAI (prosumer): prompt-to-plan with quick variants
 Studios (consumer): licensed templates, on-demand associates, curated materials
-Matters (SMB): progress/inventory/payouts in one lightweight workflow
+Matters (SMB): progress, inventory, and payouts in one lightweight workflow
 
-Raising $300k pre-seed to harden VitruviAI, expand supply, and run SMB pilots. If this overlaps with your investment vision, could we do a quick call?
+We’re raising $300k pre-seed to harden VitruviAI, expand supply, and run SMB pilots. If this overlaps with your investment vision, could we do a quick call?
 
 Demo: www.builtattic.com | PASSCODE: 0Xodtixh
 Site: www.builtattic.info
@@ -172,30 +184,24 @@ Akshat
         height=260,
     )
 
-    # --- Updated HTML body (left-aligned, formal, no bold) ---
-      # --- Updated HTML body (left-aligned, fully flush to the left) ---
-       # --- Default Gmail-style body (no custom fonts, margins, or tables) ---
- html_tpl = st.text_area(
-    "HTML Body",
-    value="""<!doctype html>
+    # --- Default Gmail-style HTML (keeps wording; natural gaps; left-aligned) ---
+    html_tpl = st.text_area(
+        "HTML Body",
+        value="""<!doctype html>
 <html>
   <head>
     <meta charset="UTF-8">
   </head>
   <body style="margin:0;padding:0;">
-    <div style="padding:16px; font-family:Arial, Helvetica, sans-serif; font-size:14px; color:#202124; line-height:1.6;">
+    <div style="padding:16px; font-family:Arial, Helvetica, sans-serif; font-size:14px; color:#202124; line-height:1.6; text-align:left;">
 
       <p>World's First Architecture OS; $262B TAM; 400+ LOIs</p>
 
       <p>Hey {{ first_name|default('there') }},</p>
 
-      <p>
-        Today, homeowners wait weeks, architects lack speed, and SMB builders juggle operations across chats and spreadsheets.
-      </p>
+      <p>Today, homeowners wait weeks, architects lack speed, and SMB builders juggle operations across chats and spreadsheets.</p>
 
-      <p>
-        Builtattic is an AI-first ecosystem that turns Idea → Plan → Fulfillment into minutes.
-      </p>
+      <p>Builtattic is an AI-first ecosystem that turns Idea → Plan → Fulfillment into minutes.</p>
 
       <ul style="margin:0 0 16px 24px; padding:0;">
         <li>VitruviAI (prosumer): prompt-to-plan with quick variants</li>
@@ -203,14 +209,10 @@ Akshat
         <li>Matters (SMB): progress, inventory, and payouts in one lightweight workflow</li>
       </ul>
 
-      <p>
-        We’re raising $300k pre-seed to harden VitruviAI, expand supply, and run SMB pilots.
-        If this overlaps with your investment vision, could we do a quick call?
-      </p>
+      <p>We’re raising $300k pre-seed to harden VitruviAI, expand supply, and run SMB pilots. If this overlaps with your investment vision, could we do a quick call?</p>
 
       <p>
-        Demo: <a href="https://www.builtattic.com" style="color:#1a73e8;">www.builtattic.com</a> |
-        PASSCODE: 0Xodtixh<br>
+        Demo: <a href="https://www.builtattic.com" style="color:#1a73e8;">www.builtattic.com</a> | PASSCODE: 0Xodtixh<br>
         Site: <a href="https://www.builtattic.info" style="color:#1a73e8;">www.builtattic.info</a><br>
         Attached: Pitch Deck
       </p>
@@ -223,15 +225,32 @@ Akshat
     </div>
   </body>
 </html>""",
-    height=380,
-)
+        height=380,
+    )
 
-    # --------------------
-    # Sending section
-    # --------------------
+    st.subheader("3) Optional Headers")
+    reply_to = st.text_input("Reply-To (leave blank to skip)")
+    list_unsub = st.text_input("List-Unsubscribe (URL or <mailto:...>) — optional")
+
+    st.subheader("4) Attachments (PDF, images, etc.)")
+    uploads = st.file_uploader("Attach files", accept_multiple_files=True)
+
+    st.subheader("5) Preview")
+    n_preview = st.slider("Preview how many emails?", 1, min(10, len(df)), 3)
+    if st.button("Render Previews"):
+        for i, row in df.head(n_preview).iterrows():
+            ctx = row.to_dict()
+            subj = render_template(subject_tpl, ctx)
+            body = render_template(text_tpl, ctx)
+            st.markdown(f"**To:** {row[email_col]}")
+            st.markdown(f"**Subject:** {subj}")
+            st.code(body, language="text")
+            st.divider()
+
     st.subheader("6) Send Emails")
 
     def do_send():
+        # Port as int
         try:
             smtp_port = int(str(smtp_port_input).strip())
         except Exception:
@@ -243,30 +262,33 @@ Akshat
         status = st.empty()
         delay = 60.0 / max(1, rate_per_min)
 
-        sent_rows, failed_rows = 0, 0
+        # Static headers
+        headers_static = {}
+        if reply_to:
+            headers_static["Reply-To"] = reply_to
+        if list_unsub:
+            headers_static["List-Unsubscribe"] = list_unsub
+            headers_static["List-Unsubscribe-Post"] = "List-Unsubscribe=One-Click"
+
+        # Attachments (read once)
+        attachments = []
+        if uploads:
+            for f in uploads:
+                attachments.append({
+                    "filename": f.name,
+                    "data": f.read(),
+                    "mime": (f.type or "application/octet-stream")
+                })
+
+        sent_rows = 0
+        failed_rows = 0
         error_rows: List[Dict[str, Any]] = []
 
-        attachments = []
-        if uploads := st.session_state.get("uploads"):
-            for f in uploads:
-                attachments.append({"filename": f.name, "data": f.read(), "mime": f.type or "application/octet-stream"})
+        batches = (total + int(batch_size) - 1) // int(batch_size)
 
-        for idx, row in df.iterrows():
-            ctx = row.to_dict()
-            to_addr = str(row[email_col]).strip()
-            if not to_addr:
-                failed_rows += 1
-                continue
-
-            subject = render_template(subject_tpl, ctx)
-            html_body = render_template(html_tpl, ctx)
-            text_body = render_template(text_tpl, ctx)
-
-            if dry_run:
-                status.info(f"(Dry run) Would send to {to_addr}")
-                sent_rows += 1
-                progress.progress((idx + 1) / total)
-                continue
+        for b in range(batches):
+            start_i = b * int(batch_size)
+            end_i = min(total, (b + 1) * int(batch_size))
 
             try:
                 with SMTPSession(
@@ -279,22 +301,128 @@ Akshat
                     timeout=30.0,
                     from_addr=from_addr,
                 ) as mailer:
-                    mailer.send(to_addr, subject, html_body, text_body, {}, attachments)
-                sent_rows += 1
-            except Exception as e:
-                failed_rows += 1
-                error_rows.append({"email": to_addr, "error": str(e)})
 
-            time.sleep(delay)
-            progress.progress((idx + 1) / total)
+                    last_sent = 0.0
+
+                    for idx in range(start_i, end_i):
+                        row = df.iloc[idx]
+                        ctx = row.to_dict()
+                        to_addr = str(row[email_col]).strip()
+                        if not to_addr:
+                            failed_rows += 1
+                            error_rows.append({"email": "", "code": None, "error": "missing recipient email"})
+                            progress.progress((idx + 1) / total)
+                            continue
+
+                        try:
+                            subject = render_template(subject_tpl, ctx) or ""
+                            html_body = render_template(html_tpl, ctx)
+                            text_body = render_template(text_tpl, ctx)
+                        except Exception as e:
+                            failed_rows += 1
+                            error_rows.append({"email": to_addr, "code": None, "error": f"template_error: {e}"})
+                            status.error(f"Template error for {to_addr}: {e}")
+                            progress.progress((idx + 1) / total)
+                            continue
+
+                        # Rate limit
+                        elapsed = time.time() - last_sent
+                        if elapsed < delay:
+                            time.sleep(delay - elapsed)
+
+                        if dry_run:
+                            status.info(f"(Dry run) Would send to {to_addr}")
+                            sent_rows += 1
+                            progress.progress((idx + 1) / total)
+                            continue
+
+                        attempts = 0
+                        while True:
+                            attempts += 1
+                            try:
+                                headers = dict(headers_static)
+                                # Per-row unsubscribe header if present
+                                if "unsubscribe_url" in row and pd.notna(row["unsubscribe_url"]) and "List-Unsubscribe" not in headers:
+                                    headers["List-Unsubscribe"] = str(row["unsubscribe_url"]).strip()
+                                    headers["List-Unsubscribe-Post"] = "List-Unsubscribe=One-Click"
+
+                                mailer.send(
+                                    to_addr=to_addr,
+                                    subject=subject,
+                                    html_body=html_body,
+                                    text_body=text_body,
+                                    headers=headers,
+                                    attachments=attachments,
+                                )
+                                last_sent = time.time()
+                                sent_rows += 1
+                                break
+                            except (
+                                smtplib.SMTPServerDisconnected,
+                                smtplib.SMTPDataError,
+                                smtplib.SMTPConnectError,
+                                smtplib.SMTPHeloError,
+                                smtplib.SMTPRecipientsRefused,
+                                smtplib.SMTPSenderRefused,
+                                smtplib.SMTPResponseException,
+                                socket.timeout,
+                                ConnectionResetError,
+                            ) as e:
+                                code = getattr(e, "smtp_code", None)
+                                err_bytes = getattr(e, "smtp_error", b"")
+                                err_msg = err_bytes.decode(errors="ignore") if isinstance(err_bytes, (bytes, bytearray)) else str(err_bytes or e)
+                                transient = (code is None) or (400 <= int(code) < 500)
+                                if not transient or attempts >= int(max_retries):
+                                    failed_rows += 1
+                                    error_rows.append({"email": to_addr, "code": code, "error": err_msg})
+                                    status.error(f"Failed {to_addr}: [{code}] {err_msg}")
+                                    break
+                                time.sleep(backoff(attempts))
+
+                        progress.progress((idx + 1) / total)
+                        status.write(f"Processed {idx + 1}/{total}")
+
+            except Exception as e:
+                # Batch-level failure
+                for idx in range(start_i, end_i):
+                    row = df.iloc[idx]
+                    to_addr = str(row[email_col]) if email_col in row else ""
+                    failed_rows += 1
+                    error_rows.append({"email": to_addr, "code": None, "error": f"batch_error: {e}"})
+                status.error(f"Batch connection error: {e}")
 
         st.success(f"Done. Sent: {sent_rows} | Failed: {failed_rows}")
+
+        # Failure diagnostics table + download
         if error_rows:
-            st.dataframe(pd.DataFrame(error_rows))
+            st.warning("Failure details")
+            st.dataframe(pd.DataFrame(error_rows), use_container_width=True)
 
-    if st.button("Start Sending"):
-        do_send()
+            buf = io.StringIO()
+            writer = csv.DictWriter(buf, fieldnames=["email", "code", "error"])
+            writer.writeheader()
+            for r in error_rows:
+                writer.writerow(r)
+            st.download_button(
+                "Download failure_log.csv",
+                buf.getvalue(),
+                file_name="failure_log.csv",
+                mime="text/csv",
+            )
 
-
-
-
+    send_clicked = st.button("Start Sending")
+    if send_clicked:
+        # Basic validation
+        missing = []
+        if not smtp_host:
+            missing.append("SMTP host")
+        if not from_addr:
+            missing.append("From address")
+        if not dry_run and not smtp_user:
+            missing.append("Gmail address (username)")
+        if not dry_run and not smtp_pass:
+            missing.append("App password")
+        if missing:
+            st.error("Missing: " + ", ".join(missing))
+        else:
+            do_send()
