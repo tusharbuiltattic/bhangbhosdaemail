@@ -7,7 +7,7 @@ import csv
 import smtplib
 import socket
 import uuid
-from typing import Dict, Any, Optional, List, Tuple
+from typing import Dict, Any, Optional, List
 
 import pandas as pd
 import streamlit as st
@@ -32,18 +32,19 @@ def backoff(attempt: int, base: float = 1.5, cap: float = 60.0) -> float:
     return max(0.0, wait + jitter)
 
 def extract_email(addr: str) -> str:
-    """Extract email address from 'Name <email@domain>' or return as-is."""
+    """Extract email from 'Name <addr>' or return as-is."""
     if not addr:
         return ""
     m = re.search(r"<([^>]+)>", addr)
     return (m.group(1) if m else addr).strip()
 
 def looks_like_gmail(addr: str) -> bool:
-    return addr.lower().endswith("@gmail.com") or addr.lower().endswith("@googlemail.com")
+    a = (addr or "").lower()
+    return a.endswith("@gmail.com") or a.endswith("@googlemail.com")
 
 
 class SMTPSession:
-    # Make timeout/from_addr keyword-only to avoid accidental mis-ordering
+    # keyword-only for timeout/from_addr to avoid mis-ordering
     def __init__(self, host, port, user, password, use_ssl, use_tls, *, timeout: float = 30.0, from_addr: str = ""):
         self.host = host
         self.port = int(port)
@@ -128,7 +129,7 @@ with st.sidebar:
     st.header("Gmail SMTP Settings")
     st.caption("Use: smtp.gmail.com • Port 587 • STARTTLS ON • SSL OFF")
     smtp_host = st.text_input("SMTP Host", "smtp.gmail.com")
-    smtp_port_input = st.text_input("SMTP Port", "587")  # allow text, cast later
+    smtp_port_input = st.text_input("SMTP Port", "587")  # cast later
     smtp_user = st.text_input("Gmail Address (username)", "")
     smtp_pass = st.text_input("App Password (16 chars)", "", type="password")
     from_addr = st.text_input("From (e.g. Your Name <you@gmail.com>)", "")
@@ -167,6 +168,7 @@ if file_csv:
         height=60,
     )
 
+    # Plain text body (kept simple)
     default_text = """World's First Architecture OS; $262B TAM; 400+ LOIs
 
 Hey {{ first_name|default('there') }},
@@ -189,11 +191,66 @@ Akshat
 """
     text_tpl = st.text_area("Plain Text Body", value=default_text, height=260)
 
-    # Simple HTML default (preserves line breaks)
+    # Formal HTML body (Segoe UI / Arial stack, proper spacing)
     html_tpl = st.text_area(
         "HTML Body",
-        value=f"<!doctype html><html><body><pre>{default_text}</pre></body></html>",
-        height=260,
+        value="""<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="x-apple-disable-message-reformatting">
+    <meta name="format-detection" content="telephone=no">
+    <style>
+      /* Mobile-friendly base */
+      body {
+        margin: 0; padding: 24px;
+        background: #ffffff;
+        color: #222222;
+        font-family: 'Segoe UI', Arial, Helvetica, sans-serif;
+        font-size: 15px; line-height: 1.64;
+        -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
+      }
+      p { margin: 0 0 12px 0; }
+      ul { margin: 0 0 12px 20px; padding: 0; }
+      li { margin: 0 0 6px 0; }
+      a { color: #0A66C2; text-decoration: none; }
+      a:hover { text-decoration: underline; }
+      .h1 { font-weight: 600; font-size: 16px; margin-bottom: 12px; }
+      .sig { margin-top: 18px; color: #555; font-style: italic; }
+      .wrap { max-width: 720px; margin: 0 auto; }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="h1">World's First Architecture OS; $262B TAM; 400+ LOIs</div>
+
+      <p>Hey {{ first_name|default('there') }},</p>
+
+      <p>Today, homeowners wait weeks, Architects lack speed, and SMB builders juggle ops across chats and spreadsheets.</p>
+
+      <p><strong>Builtattic</strong>: an AI-first ecosystem that turns Idea &lt; Plan &lt; Fulfillment into minutes.</p>
+
+      <ul>
+        <li><strong>VitruviAI (prosumer):</strong> prompt-to-plan with quick variants</li>
+        <li><strong>Studios (consumer):</strong> licensed templates, on-demand associates, curated materials</li>
+        <li><strong>Matters (SMB):</strong> progress/inventory/payouts in one lightweight workflow</li>
+      </ul>
+
+      <p>Raising $300k pre-seed to harden VitruviAI, expand supply, and run SMB pilots. If this overlaps with your investment vision, could we do a quick call?</p>
+
+      <p>
+        Demo: <a href="https://www.builtattic.com">www.builtattic.com</a> | PASSCODE: <strong>0Xodtixh</strong><br>
+        Site: <a href="https://www.builtattic.info">www.builtattic.info</a><br>
+        Attached: Pitch Deck
+      </p>
+
+      <p class="sig">
+        Regards,<br>Akshat
+      </p>
+    </div>
+  </body>
+</html>""",
+        height=420,
     )
 
     st.subheader("3) Optional Headers")
@@ -218,19 +275,19 @@ Akshat
     st.subheader("6) Send Emails")
 
     def do_send():
-        # Cast port safely to int
+        # Port as int
         try:
             smtp_port = int(str(smtp_port_input).strip())
         except Exception:
-            st.error("SMTP Port must be a number (e.g., 587).")
+            st.error("SMTP Port must be a number, e.g., 587.")
             return
 
-        # Pre-flight Gmail sanity checks
+        # Gmail sanity check
         from_email = extract_email(from_addr)
         if looks_like_gmail(smtp_user) and looks_like_gmail(from_email) and (from_email.lower() != smtp_user.lower()):
             st.warning(
-                "Gmail usually requires the From email to match your Gmail username (or be a verified 'Send mail as' alias). "
-                f"Current mismatch: From={from_email} vs Username={smtp_user}"
+                "Gmail often requires the From email to match your Gmail username (or be a verified 'Send mail as' alias). "
+                f"From={from_email} vs Username={smtp_user}"
             )
 
         total = len(df)
@@ -246,7 +303,7 @@ Akshat
             headers_static["List-Unsubscribe"] = list_unsub
             headers_static["List-Unsubscribe-Post"] = "List-Unsubscribe=One-Click"
 
-        # Read attachments into memory once
+        # Attachments (loaded once)
         attachments = []
         if uploads:
             for f in uploads:
@@ -317,7 +374,7 @@ Akshat
                             attempts += 1
                             try:
                                 headers = dict(headers_static)
-                                # Per-row unsubscribe header support
+                                # per-row unsubscribe header if present
                                 if "unsubscribe_url" in row and pd.notna(row["unsubscribe_url"]) and "List-Unsubscribe" not in headers:
                                     headers["List-Unsubscribe"] = str(row["unsubscribe_url"]).strip()
                                     headers["List-Unsubscribe-Post"] = "List-Unsubscribe=One-Click"
@@ -347,7 +404,6 @@ Akshat
                                 code = getattr(e, "smtp_code", None)
                                 err_bytes = getattr(e, "smtp_error", b"")
                                 err_msg = err_bytes.decode(errors="ignore") if isinstance(err_bytes, (bytes, bytearray)) else str(err_bytes or e)
-                                # Consider 4xx transient; 5xx permanent
                                 transient = (code is None) or (400 <= int(code) < 500)
                                 if not transient or attempts >= int(max_retries):
                                     failed_rows += 1
@@ -360,7 +416,7 @@ Akshat
                         status.write(f"Processed {idx + 1}/{total}")
 
             except Exception as e:
-                # Whole batch connection failure
+                # Batch-level connection failure
                 for idx in range(start_i, end_i):
                     row = df.iloc[idx]
                     to_addr = str(row[email_col]) if email_col in row else ""
@@ -389,7 +445,6 @@ Akshat
 
     send_clicked = st.button("Start Sending")
     if send_clicked:
-        # Basic validation for Gmail flow
         missing = []
         if not smtp_host:
             missing.append("SMTP host")
