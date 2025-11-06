@@ -195,7 +195,7 @@ Akshat
   <head>
     <meta charset="UTF-8">
   </head>
-  <body style="margin:0;padding:0;font-family:sans-serif;font-size:14px;color:#202124;line-height:1.5;text-align:left;">
+  <body style="margin:0;padding:0;font-family:sans-serif;font-size:12px;color:#202124;line-height:1;text-align:left;">
 
 World's First Architecture OS; $262B TAM; 400+ LOIs<br><br>
 
@@ -420,6 +420,7 @@ Akshat
             st.error("Missing: " + ", ".join(missing))
         else:
             do_send()
+
 
 
 
