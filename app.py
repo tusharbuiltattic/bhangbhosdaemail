@@ -173,9 +173,10 @@ Akshat
     )
 
     # --- Updated HTML body (left-aligned, formal, no bold) ---
-   html_tpl = st.text_area(
-    "HTML Body",
-    value="""<!doctype html>
+      # --- Updated HTML body (left-aligned, fully flush to the left) ---
+    html_tpl = st.text_area(
+        "HTML Body",
+        value="""<!doctype html>
 <html>
   <head>
     <meta charset="UTF-8">
@@ -244,8 +245,8 @@ Akshat
     </table>
   </body>
 </html>""",
-    height=420,
-)
+        height=420,
+    )
 
     # --------------------
     # Sending section
@@ -315,4 +316,5 @@ Akshat
 
     if st.button("Start Sending"):
         do_send()
+
 
