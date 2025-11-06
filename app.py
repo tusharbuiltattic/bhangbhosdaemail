@@ -175,45 +175,56 @@ Akshat
     # --- Updated HTML body (left-aligned, formal, no bold) ---
       # --- Updated HTML body (left-aligned, fully flush to the left) ---
        # --- Default Gmail-style body (no custom fonts, margins, or tables) ---
-    html_tpl = st.text_area(
-        "HTML Body",
-        value="""<!doctype html>
+ html_tpl = st.text_area(
+    "HTML Body",
+    value="""<!doctype html>
 <html>
   <head>
     <meta charset="UTF-8">
   </head>
   <body style="margin:0;padding:0;">
-    <p>World's First Architecture OS; $262B TAM; 400+ LOIs</p>
+    <div style="padding:16px; font-family:Arial, Helvetica, sans-serif; font-size:14px; color:#202124; line-height:1.6;">
 
-    <p>Hey {{ first_name|default('there') }},</p>
+      <p>World's First Architecture OS; $262B TAM; 400+ LOIs</p>
 
-    <p>Today, homeowners wait weeks, architects lack speed, and SMB builders juggle operations across chats and spreadsheets.</p>
+      <p>Hey {{ first_name|default('there') }},</p>
 
-    <p>Builtattic is an AI-first ecosystem that turns Idea → Plan → Fulfillment into minutes.</p>
+      <p>
+        Today, homeowners wait weeks, architects lack speed, and SMB builders juggle operations across chats and spreadsheets.
+      </p>
 
-    <ul>
-      <li>VitruviAI (prosumer): prompt-to-plan with quick variants</li>
-      <li>Studios (consumer): licensed templates, on-demand associates, curated materials</li>
-      <li>Matters (SMB): progress, inventory, and payouts in one lightweight workflow</li>
-    </ul>
+      <p>
+        Builtattic is an AI-first ecosystem that turns Idea → Plan → Fulfillment into minutes.
+      </p>
 
-    <p>We’re raising $300k pre-seed to harden VitruviAI, expand supply, and run SMB pilots.
-    If this overlaps with your investment vision, could we do a quick call?</p>
+      <ul style="margin:0 0 16px 24px; padding:0;">
+        <li>VitruviAI (prosumer): prompt-to-plan with quick variants</li>
+        <li>Studios (consumer): licensed templates, on-demand associates, curated materials</li>
+        <li>Matters (SMB): progress, inventory, and payouts in one lightweight workflow</li>
+      </ul>
 
-    <p>
-      Demo: <a href="https://www.builtattic.com">www.builtattic.com</a> | PASSCODE: 0Xodtixh<br>
-      Site: <a href="https://www.builtattic.info">www.builtattic.info</a><br>
-      Attached: Pitch Deck
-    </p>
+      <p>
+        We’re raising $300k pre-seed to harden VitruviAI, expand supply, and run SMB pilots.
+        If this overlaps with your investment vision, could we do a quick call?
+      </p>
 
-    <p style="margin-top:16px;">
-      Regards,<br>
-      Akshat
-    </p>
+      <p>
+        Demo: <a href="https://www.builtattic.com" style="color:#1a73e8;">www.builtattic.com</a> |
+        PASSCODE: 0Xodtixh<br>
+        Site: <a href="https://www.builtattic.info" style="color:#1a73e8;">www.builtattic.info</a><br>
+        Attached: Pitch Deck
+      </p>
+
+      <p style="margin-top:20px;">
+        Regards,<br>
+        Akshat
+      </p>
+
+    </div>
   </body>
 </html>""",
-        height=380,
-    )
+    height=380,
+)
 
     # --------------------
     # Sending section
@@ -283,6 +294,7 @@ Akshat
 
     if st.button("Start Sending"):
         do_send()
+
 
 
 
