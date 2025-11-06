@@ -174,78 +174,45 @@ Akshat
 
     # --- Updated HTML body (left-aligned, formal, no bold) ---
       # --- Updated HTML body (left-aligned, fully flush to the left) ---
+       # --- Default Gmail-style body (no custom fonts, margins, or tables) ---
     html_tpl = st.text_area(
         "HTML Body",
         value="""<!doctype html>
 <html>
   <head>
     <meta charset="UTF-8">
-    <meta name="x-apple-disable-message-reformatting">
-    <meta name="format-detection" content="telephone=no">
-    <style>
-      body {
-        background-color: #ffffff;
-        margin: 0;
-        padding: 0;
-        font-family: 'Segoe UI', Arial, Helvetica, sans-serif;
-        font-size: 15px;
-        color: #222222;
-        line-height: 1.6;
-        text-align: left;
-        -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
-      }
-      table {
-        width: 100%;
-        border-collapse: collapse;
-      }
-      td {
-        padding: 24px 32px;
-        vertical-align: top;
-      }
-      p { margin: 0 0 12px 0; }
-      ul { margin: 0 0 12px 20px; padding: 0; }
-      li { margin-bottom: 6px; }
-      a { color: #0A66C2; text-decoration: none; }
-      a:hover { text-decoration: underline; }
-      .signature { margin-top: 20px; color: #555555; font-style: italic; }
-    </style>
   </head>
-  <body>
-    <table role="presentation">
-      <tr>
-        <td>
-          <p>World's First Architecture OS; $262B TAM; 400+ LOIs</p>
+  <body style="margin:0;padding:0;">
+    <p>World's First Architecture OS; $262B TAM; 400+ LOIs</p>
 
-          <p>Hey {{ first_name|default('there') }},</p>
+    <p>Hey {{ first_name|default('there') }},</p>
 
-          <p>Today, homeowners wait weeks, architects lack speed, and SMB builders juggle operations across chats and spreadsheets.</p>
+    <p>Today, homeowners wait weeks, architects lack speed, and SMB builders juggle operations across chats and spreadsheets.</p>
 
-          <p>Builtattic is an AI-first ecosystem that turns Idea → Plan → Fulfillment into minutes.</p>
+    <p>Builtattic is an AI-first ecosystem that turns Idea → Plan → Fulfillment into minutes.</p>
 
-          <ul>
-            <li>VitruviAI (prosumer): prompt-to-plan with quick variants</li>
-            <li>Studios (consumer): licensed templates, on-demand associates, curated materials</li>
-            <li>Matters (SMB): progress, inventory, and payouts in one lightweight workflow</li>
-          </ul>
+    <ul>
+      <li>VitruviAI (prosumer): prompt-to-plan with quick variants</li>
+      <li>Studios (consumer): licensed templates, on-demand associates, curated materials</li>
+      <li>Matters (SMB): progress, inventory, and payouts in one lightweight workflow</li>
+    </ul>
 
-          <p>We’re raising $300k pre-seed to harden VitruviAI, expand supply, and run SMB pilots. If this overlaps with your investment vision, could we do a quick call?</p>
+    <p>We’re raising $300k pre-seed to harden VitruviAI, expand supply, and run SMB pilots.
+    If this overlaps with your investment vision, could we do a quick call?</p>
 
-          <p>
-            Demo: <a href="https://www.builtattic.com">www.builtattic.com</a> | PASSCODE: 0Xodtixh<br>
-            Site: <a href="https://www.builtattic.info">www.builtattic.info</a><br>
-            Attached: Pitch Deck
-          </p>
+    <p>
+      Demo: <a href="https://www.builtattic.com">www.builtattic.com</a> | PASSCODE: 0Xodtixh<br>
+      Site: <a href="https://www.builtattic.info">www.builtattic.info</a><br>
+      Attached: Pitch Deck
+    </p>
 
-          <p class="signature">
-            Regards,<br>Akshat
-          </p>
-        </td>
-      </tr>
-    </table>
+    <p style="margin-top:16px;">
+      Regards,<br>
+      Akshat
+    </p>
   </body>
 </html>""",
-        height=420,
+        height=380,
     )
 
     # --------------------
@@ -316,5 +283,6 @@ Akshat
 
     if st.button("Start Sending"):
         do_send()
+
 
 
