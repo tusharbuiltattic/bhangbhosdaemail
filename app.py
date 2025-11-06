@@ -187,6 +187,7 @@ Akshat
     # --- Default Gmail-style HTML (keeps wording; natural gaps; left-aligned) ---
     # --- Super-clean Gmail-native look (minimal spacing, no extra padding) ---
       # --- Exact Gmail-like formatting (no gaps, compact line rhythm) ---
+       # --- Exact Gmail-style formatting (identical to manual compose) ---
     html_tpl = st.text_area(
         "HTML Body",
         value="""<!doctype html>
@@ -194,11 +195,11 @@ Akshat
   <head>
     <meta charset="UTF-8">
   </head>
-  <body style="margin:0;padding:0;font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#202124;line-height:1.4;text-align:left;">
+  <body style="margin:0;padding:0;font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#202124;line-height:1.5;text-align:left;">
+
 World's First Architecture OS; $262B TAM; 400+ LOIs<br><br>
 
-Hey {{ first_name|default('there') }},<br><br>
-
+Hey {{ first_name|default('there') }},<br>
 Today, homeowners wait weeks, Architects lack speed, and SMB builders juggle ops across chats and spreadsheets.<br><br>
 
 Builtattic: an AI-first ecosystem that turns Idea &lt; Plan &lt; Fulfillment into minutes.<br><br>
@@ -217,8 +218,9 @@ Regards,<br>
 Akshat
   </body>
 </html>""",
-        height=320,
+        height=300,
     )
+
 
     st.subheader("3) Optional Headers")
     reply_to = st.text_input("Reply-To (leave blank to skip)")
@@ -418,5 +420,6 @@ Akshat
             st.error("Missing: " + ", ".join(missing))
         else:
             do_send()
+
 
 
