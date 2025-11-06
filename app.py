@@ -185,6 +185,7 @@ Akshat
     )
 
     # --- Default Gmail-style HTML (keeps wording; natural gaps; left-aligned) ---
+    # --- Super-clean Gmail-native look (minimal spacing, no extra padding) ---
     html_tpl = st.text_area(
         "HTML Body",
         value="""<!doctype html>
@@ -192,40 +193,31 @@ Akshat
   <head>
     <meta charset="UTF-8">
   </head>
-  <body style="margin:0;padding:0;">
-    <div style="padding:16px; font-family:Arial, Helvetica, sans-serif; font-size:14px; color:#202124; line-height:1.6; text-align:left;">
+  <body style="margin:0;padding:0;font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#202124;line-height:1.4;">
+    <p>World's First Architecture OS; $262B TAM; 400+ LOIs</p>
 
-      <p>World's First Architecture OS; $262B TAM; 400+ LOIs</p>
+    <p>Hey {{ first_name|default('there') }},</p>
 
-      <p>Hey {{ first_name|default('there') }},</p>
+    <p>Today, homeowners wait weeks, architects lack speed, and SMB builders juggle operations across chats and spreadsheets.</p>
 
-      <p>Today, homeowners wait weeks, architects lack speed, and SMB builders juggle operations across chats and spreadsheets.</p>
+    <p>Builtattic is an AI-first ecosystem that turns Idea → Plan → Fulfillment into minutes.</p>
 
-      <p>Builtattic is an AI-first ecosystem that turns Idea → Plan → Fulfillment into minutes.</p>
+    <p>VitruviAI (prosumer): prompt-to-plan with quick variants<br>
+    Studios (consumer): licensed templates, on-demand associates, curated materials<br>
+    Matters (SMB): progress, inventory, and payouts in one lightweight workflow</p>
 
-      <ul style="margin:0 0 16px 24px; padding:0;">
-        <li>VitruviAI (prosumer): prompt-to-plan with quick variants</li>
-        <li>Studios (consumer): licensed templates, on-demand associates, curated materials</li>
-        <li>Matters (SMB): progress, inventory, and payouts in one lightweight workflow</li>
-      </ul>
+    <p>We’re raising $300k pre-seed to harden VitruviAI, expand supply, and run SMB pilots. 
+    If this overlaps with your investment vision, could we do a quick call?</p>
 
-      <p>We’re raising $300k pre-seed to harden VitruviAI, expand supply, and run SMB pilots. If this overlaps with your investment vision, could we do a quick call?</p>
+    <p>Demo: <a href="https://www.builtattic.com" style="color:#1a73e8;">www.builtattic.com</a> | PASSCODE: 0Xodtixh<br>
+    Site: <a href="https://www.builtattic.info" style="color:#1a73e8;">www.builtattic.info</a><br>
+    Attached: Pitch Deck</p>
 
-      <p>
-        Demo: <a href="https://www.builtattic.com" style="color:#1a73e8;">www.builtattic.com</a> | PASSCODE: 0Xodtixh<br>
-        Site: <a href="https://www.builtattic.info" style="color:#1a73e8;">www.builtattic.info</a><br>
-        Attached: Pitch Deck
-      </p>
-
-      <p style="margin-top:20px;">
-        Regards,<br>
-        Akshat
-      </p>
-
-    </div>
+    <p>Regards,<br>
+    Akshat</p>
   </body>
 </html>""",
-        height=380,
+        height=340,
     )
 
     st.subheader("3) Optional Headers")
@@ -426,3 +418,4 @@ Akshat
             st.error("Missing: " + ", ".join(missing))
         else:
             do_send()
+
